@@ -1,74 +1,80 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Readers-Writers Problem</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" type="text/css" href="../index.css">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-  <style>
-    pre {
-      
-      padding: 1rem;
-      
-    }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#07111f" />
+    <title>Readers-Writers Problem - OS Visualizer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../styles.css" />
 </head>
 <body>
-  <div class="container my-5">
-    <h2 class="mb-4">Readers-Writers Problem</h2>
+    <div class="container">
+        <header class="navbar">
+            <div class="logo">OS Explorer</div>
+            <nav>
+                <a href="../../index.html">Home</a>
+                <a href="../index.html">Back to Modules</a>
+            </nav>
+        </header>
 
-    <p><strong>Shared Data:</strong> (e.g., a file or record)</p>
-    <ul>
-      <li><strong>Readers</strong> – only read the shared object</li>
-      <li><strong>Writers</strong> – update (read and write) the shared object</li>
-    </ul>
+        <section class="panel" style="margin-top: 40px; padding: 40px;">
+            <h1 style="margin-bottom: 20px;">Readers-Writers Problem</h1>
 
-    <p><strong>Problem:</strong> If a writer and another process (reader or writer) access the shared data simultaneously, it can lead to inconsistency.</p>
+            <p style="color: var(--text-muted); margin-bottom: 15px; font-size: 1.1rem; line-height: 1.6;">
+              <strong style="color: var(--text);">Shared Data:</strong> (e.g., a file or record)
+            </p>
+            <ul style="color: var(--text-muted); margin-left: 20px; line-height: 1.6; margin-bottom: 30px;">
+              <li><strong style="color: #60a5fa;">Readers</strong> – only read the shared object</li>
+              <li><strong style="color: #f472b6;">Writers</strong> – update (read and write) the shared object</li>
+            </ul>
 
-    <h4 class="mt-4">Variations of the Readers-Writers Problem</h4>
-    <ol>
-      <li>
-        <strong>First Readers-Writers Problem:</strong><br>
-        No reader should wait unless a writer has already obtained permission to use the shared object.
-        <ul>
-          <li>Readers do not wait if a writer is only waiting.</li>
-          <li><strong>Writers may starve.</strong></li>
-        </ul>
-      </li>
-      <li>
-        <strong>Second Readers-Writers Problem:</strong><br>
-        Once a writer is ready, it should write as soon as possible, preventing new readers from starting.
-        <ul>
-          <li><strong>Readers may starve.</strong></li>
-        </ul>
-      </li>
-    </ol>
+            <p style="color: var(--text); padding: 15px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; border-left: 4px solid #ef4444; margin-bottom: 40px;">
+              <strong>Problem:</strong> If a writer and another process (reader or writer) access the shared data simultaneously, it can lead to inconsistency.
+            </p>
 
-    <h4 class="mt-4">First Readers-Writers Problem Implementation</h4>
-    <p><strong>Shared Variables:</strong></p>
-    <ul>
-      <li><code class="inline">int readcount</code> – keeps track of how many readers are currently accessing the object</li>
-      <li><code class="inline">semaphore mutex</code> – ensures mutual exclusion when <code class="inline">readcount</code> is updated</li>
-      <li><code class="inline">semaphore wrt</code> – mutual exclusion for writers</li>
-    </ul>
+            <h3 style="margin-bottom: 15px;">Variations of the Problem</h3>
+            <ol style="color: var(--text-muted); margin-left: 20px; line-height: 1.8; margin-bottom: 40px;">
+              <li style="margin-bottom: 15px;">
+                <strong style="color: var(--text);">First Readers-Writers Problem:</strong><br>
+                No reader should wait unless a writer has already obtained permission to use the shared object.
+                <ul style="margin-left: 20px; margin-top: 5px;">
+                  <li>Readers do not wait if a writer is only waiting.</li>
+                  <li style="color: #ef4444;">Writers may starve.</li>
+                </ul>
+              </li>
+              <li>
+                <strong style="color: var(--text);">Second Readers-Writers Problem:</strong><br>
+                Once a writer is ready, it should write as soon as possible, preventing new readers from starting.
+                <ul style="margin-left: 20px; margin-top: 5px;">
+                  <li style="color: #ef4444;">Readers may starve.</li>
+                </ul>
+              </li>
+            </ol>
 
-    <p><strong>Initial Values:</strong></p>
-    <ul>
-      <li><code class="inline">mutex = 1</code></li>
-      <li><code class="inline">wrt = 1</code></li>
-      <li><code class="inline">readcount = 0</code></li>
-    </ul>
+            <h3 style="margin-bottom: 15px;">First Readers-Writers Problem Implementation</h3>
+            <p style="color: var(--text-muted); margin-bottom: 10px;"><strong style="color: var(--text);">Shared Variables:</strong></p>
+            <ul style="color: var(--text-muted); margin-left: 20px; line-height: 1.6; margin-bottom: 20px;">
+              <li><code style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; color: #a5d8ff;">int readcount</code> – keeps track of how many readers are currently accessing the object</li>
+              <li><code style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; color: #a5d8ff;">semaphore mutex</code> – ensures mutual exclusion when <code style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px;">readcount</code> is updated</li>
+              <li><code style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; color: #a5d8ff;">semaphore wrt</code> – mutual exclusion for writers</li>
+            </ul>
 
-    <h5 class="mt-4">Writer Process</h5>
-    <pre><code>wait(wrt);
+            <p style="color: var(--text); padding: 15px; background: rgba(56, 189, 248, 0.1); border-radius: 8px; border-left: 4px solid var(--accent); margin-bottom: 30px;">
+                <strong>Initial values:</strong> <code>mutex = 1</code>, <code>wrt = 1</code>, <code>readcount = 0</code>
+            </p>
+
+            <h3 style="margin-bottom: 15px;">Writer Process</h3>
+            <pre style="background: #0f172a; padding: 20px; border-radius: 12px; overflow-x: auto; color: #e2e8f0; font-family: monospace; margin-bottom: 30px; border: 1px solid rgba(255,255,255,0.05);"><code>wait(wrt);
 // ...
 // writing is performed
 // ...
 signal(wrt);</code></pre>
 
-    <h5 class="mt-4">Reader Process</h5>
-    <pre><code>wait(mutex);
+            <h3 style="margin-bottom: 15px;">Reader Process</h3>
+            <pre style="background: #0f172a; padding: 20px; border-radius: 12px; overflow-x: auto; color: #e2e8f0; font-family: monospace; margin-bottom: 30px; border: 1px solid rgba(255,255,255,0.05);"><code>wait(mutex);
 readcount++;
 if (readcount == 1)
     wait(wrt);
@@ -83,6 +89,7 @@ readcount--;
 if (readcount == 0)
     signal(wrt);
 signal(mutex);</code></pre>
-  </div>
+        </section>
+    </div>
 </body>
 </html>

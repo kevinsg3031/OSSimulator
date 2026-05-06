@@ -2,108 +2,131 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Reader-Writer Problem</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <title>Reader-Writer Problem - OS Visualizer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../styles.css">
   <style>
-    html, body {
-      min-height: 100%;
-      font-family: 'Poppins', sans-serif;
-      background: url('../background.jpg') no-repeat center center fixed;
-      background-size: cover;
-      background-repeat: no-repeat;
-      background-position: center;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 40px 20px;
-    }
-
-    .box {
-      background-color: rgba(255, 255, 255, 0.9);
-      padding: 30px;
-      border-radius: 20px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-      max-width: 800px;
-      width: 100%;
+    .simulation-panel {
+      margin-top: 40px;
+      padding: 40px;
       text-align: center;
     }
-
-    h1 {
+    
+    #reader-count {
+      font-size: 24px;
+      margin-bottom: 25px;
+      font-family: 'Space Grotesk', sans-serif;
       font-weight: 700;
-      margin-bottom: 20px;
-      color: #2c3e50;
+      color: var(--accent);
     }
 
-    #reader-count {
-      font-size: 20px;
-      margin-bottom: 25px;
+    .btn-group {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
     }
 
     button {
-      margin: 10px 10px 20px;
-      padding: 10px 20px;
+      padding: 12px 24px;
       font-size: 16px;
+      font-weight: 600;
       border: none;
       border-radius: 8px;
       cursor: pointer;
-      transition: background-color 0.3s;
+      transition: all 0.3s ease;
+      font-family: 'Inter', sans-serif;
     }
 
-    #read-btn, #write-btn {
-      background-color: #e3e3ff;
-      color: #000;
+    #read-btn {
+      background-color: rgba(56, 189, 248, 0.1);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.2);
+    }
+    #read-btn:hover {
+      background-color: rgba(56, 189, 248, 0.2);
+    }
+
+    #write-btn {
+      background-color: rgba(244, 114, 182, 0.1);
+      color: #f472b6;
+      border: 1px solid rgba(244, 114, 182, 0.2);
+    }
+    #write-btn:hover {
+      background-color: rgba(244, 114, 182, 0.2);
     }
 
     #reset-btn {
-      background-color: #ffdddd;
-      color: #000;
+      background-color: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.2);
     }
-
-    button:hover {
-      opacity: 0.9;
+    #reset-btn:hover {
+      background-color: rgba(239, 68, 68, 0.2);
     }
 
     #output {
       margin-top: 30px;
-      background-color: rgba(255, 255, 255, 0.85);
-      border: 1px solid #ddd;
+      background-color: #0f172a;
+      border: 1px solid rgba(255,255,255,0.05);
       border-radius: 12px;
-      padding: 15px 20px;
-      max-width: 90%;
+      padding: 20px;
+      max-width: 100%;
       text-align: left;
-      margin-left: auto;
-      margin-right: auto;
       font-size: 15px;
-      font-family: 'Courier New', monospace;
-      min-height: 100px;
+      font-family: monospace;
+      min-height: 150px;
       line-height: 1.6;
       white-space: pre-wrap;
+      color: #e2e8f0;
     }
 
     #mutex-status {
       font-size: 18px;
       margin-top: 20px;
-      color: #2c3e50;
-      font-weight: bold;
+      font-weight: 600;
+      color: #10b981; /* Default unlocked */
+      padding: 10px 20px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 8px;
+      display: inline-block;
     }
 
     .warning {
-      color: red;
-      font-weight: bold;
+      color: #ef4444;
+      font-weight: 600;
     }
   </style>
 </head>
 <body>
-  <div class="box">
-    <h1>Reader-Writer Problem</h1>
-    <div id="reader-count">Readers: 0</div>
-    <button id="read-btn" onclick="startReading()">Start Reading</button>
-    <button id="write-btn" onclick="startWriting()">Start Writing</button>
-    <button id="reset-btn" onclick="reset()">Reset</button>
-    <div id="output"></div>
-    <div id="mutex-status">Mutex: Unlocked</div>
+  <div class="container">
+    <header class="navbar">
+      <div class="logo">OS Explorer</div>
+      <nav>
+          <a href="../../index.html">Home</a>
+          <a href="../index.html">Back to Modules</a>
+      </nav>
+    </header>
+
+    <section class="panel simulation-panel">
+      <h1 style="margin-bottom: 20px;">Reader-Writer Simulation</h1>
+      <p style="color: var(--text-muted); margin-bottom: 30px;">Coordinate multiple readers and writers accessing a shared resource while preventing race conditions.</p>
+
+      <div id="reader-count">Readers: 0</div>
+      
+      <div class="btn-group">
+        <button id="read-btn" onclick="startReading()">Start Reading</button>
+        <button id="write-btn" onclick="startWriting()">Start Writing</button>
+        <button id="reset-btn" onclick="reset()">Reset Simulation</button>
+      </div>
+
+      <div id="mutex-status">Mutex: Unlocked</div>
+
+      <div id="output"></div>
+    </section>
   </div>
 
   <script>
@@ -119,8 +142,8 @@
         readers++;
         updateReaderCount();
         const statusElement = document.getElementById("mutex-status");
-        statusElement.innerHTML = "Mutex: Locked";
-        statusElement.style.color = "red";
+        statusElement.innerHTML = "Mutex: Locked (Reading)";
+        statusElement.style.color = "#f59e0b"; // warning color
         read();
       }
     }
@@ -133,8 +156,8 @@
       } else {
         writers++;
         const statusElement = document.getElementById("mutex-status");
-        statusElement.innerHTML = "Mutex: Locked";
-        statusElement.style.color = "red";
+        statusElement.innerHTML = "Mutex: Locked (Writing)";
+        statusElement.style.color = "#ef4444"; // error red
         write();
       }
     }
@@ -145,9 +168,9 @@
         timeouts.push(retryTimeout);
       } else {
         const output = document.getElementById("output");
-        output.innerHTML += "Reader is reading...<br>";
+        output.innerHTML += "<span style='color: #38bdf8'>Reader is reading...</span>\n";
         const timeout = setTimeout(function () {
-          output.innerHTML += "Reader finished reading.<br>";
+          output.innerHTML += "<span style='color: #94a3b8'>Reader finished reading.</span>\n";
           readers--;
           updateReaderCount();
           updateReadersMutex();
@@ -163,9 +186,9 @@
       } else {
         writing = true;
         const output = document.getElementById("output");
-        output.innerHTML += "Writer is writing...<br>";
+        output.innerHTML += "<span style='color: #f472b6'>Writer is writing...</span>\n";
         const timeout = setTimeout(function () {
-          output.innerHTML += "Writer finished writing.<br>";
+          output.innerHTML += "<span style='color: #94a3b8'>Writer finished writing.</span>\n";
           writing = false;
           writers--;
           updateWritersMutex();
@@ -178,29 +201,25 @@
       document.getElementById("reader-count").innerHTML = `Readers: ${readers}`;
     }
 
-    function updateWritersMutex()
-    {
-      if(writers == 0)
-      {
+    function updateWritersMutex() {
+      if(writers == 0) {
         const statusElement = document.getElementById("mutex-status");
         statusElement.innerHTML = "Mutex: Unlocked";
-        statusElement.style.color = "green";
+        statusElement.style.color = "#10b981"; // success green
       }
     }
 
-    function updateReadersMutex()
-    {
-      if(readers == 0)
-      {
+    function updateReadersMutex() {
+      if(readers == 0) {
         const statusElement = document.getElementById("mutex-status");
         statusElement.innerHTML = "Mutex: Unlocked";
-        statusElement.style.color = "green";
+        statusElement.style.color = "#10b981";
       }
     }
 
     function showWarning(message) {
       const output = document.getElementById("output");
-      output.innerHTML += `<span class="warning">${message}</span><br>`;
+      output.innerHTML += `<span class="warning">${message}</span>\n`;
     }
 
     function reset() {
@@ -217,7 +236,7 @@
 
       const statusElement = document.getElementById("mutex-status");
       statusElement.innerHTML = "Mutex: Unlocked";
-      statusElement.style.color = "green";
+      statusElement.style.color = "#10b981";
     }
   </script>
 </body>

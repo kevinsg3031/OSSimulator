@@ -22,45 +22,37 @@ function sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-// responsive navbar
-function toggleMenu() {
-    var menu = document.getElementById("menu");
-    var github = document.getElementById("github");
-    if (
-        menu.classList.contains("hidden") &&
-        github.classList.contains("hidden")
-    ) {
-        menu.classList.remove("hidden");
-        github.classList.remove("hidden");
-    } else {
-        menu.classList.add("hidden");
-        github.classList.add("hidden");
-    }
-}
-
 // getting the input from the user
 function getValues() {
-    let customers = document.getElementById("customerCount").value;
+    let inputVal = document.getElementById("customerCount").value.trim();
     let chair = document.getElementById("chairCount").value;
-    customers = customers.trim().split(" ");
+    
+    let customers = [];
+    if (inputVal === "") {
+        // Handled below
+    } else if (!isNaN(inputVal) && parseInt(inputVal) > 0) {
+        let count = parseInt(inputVal);
+        for(let i=1; i<=count; i++) {
+            customers.push("Customer_" + i);
+        }
+    } else {
+        customers = inputVal.split(" ");
+    }
+    
     let chairs = [];
 
-    if (customers[0] == "") {
-        document.getElementById(
-            "waitingRoom"
-        ).innerHTML = `<div class="bg-blue-500 text-white font-bold py-2 px-4 rounded">Waiting Room Empty at ${new Date().toLocaleTimeString()}</div>`;
-        console.log("Saurav Hathi");
-        document.getElementById(
-            "cuttingRoom"
-        ).innerHTML = `<div class="bg-green-500 text-white font-bold py-2 px-4 rounded">Hair Cut Room Empty at ${new Date().toLocaleTimeString()}</div>`;
-        document.getElementById("baberSl").style.display = "block";
-        document.getElementById(
-            "barberSleeping"
-        ).innerHTML = `<div class="bg-yellow-500 text-white font-bold py-2 px-4 rounded">Barber Sleeping at ${new Date().toLocaleTimeString()}</div>`;
-        return;
-    } else if (chair == "") {
-        document.getElementById("chEr").style.display = "block";
-        return;
+    if (customers.length === 0) {
+        let time = new Date().toLocaleTimeString();
+        document.getElementById("waitingRoom").innerHTML = `<div class="status-msg info">Waiting Room Empty at ${time}</div>`;
+        document.getElementById("cuttingRoom").innerHTML = `<div class="status-msg success">Hair Cut Room Empty at ${time}</div>`;
+        document.getElementById("baberSl").classList.remove("hidden");
+        document.getElementById("barberSleeping").innerHTML = `<div class="status-msg warning">Barber Sleeping at ${time}</div>`;
+        return [[], []];
+    } else if (chair == "" || parseInt(chair) <= 0) {
+        document.getElementById("chEr").classList.remove("hidden");
+        return [[], []];
+    } else {
+        document.getElementById("chEr").classList.add("hidden");
     }
 
     for (let i = 0; i < chair; i++) {
@@ -77,103 +69,88 @@ function clr() {
     document.getElementById("cuttingRoom").innerHTML = "";
     document.getElementById("cuttingLeavingRoom").innerHTML = "";
     document.getElementById("barberSleeping").innerHTML = "";
-}
-
-const checkAuthor = document.getElementById("checkAuthor");
-if (checkAuthor.children[0].innerHTML.trim() === "Saurav Hathi") {
-} else {
-    window.location.href = "https://github.com/sauravhathi";
+    document.getElementById("cuttingLeaving").classList.add("hidden");
+    document.getElementById("baberSl").classList.add("hidden");
 }
 
 // start function to start the simulation and show the output
 function start() {
     clr();
-    // getValues function to get the input from the user
     const [customers, chairs] = getValues();
+    if (customers.length === 0) return;
 
     let waitting = 0;
-
-    // object of FifoQueue class
     const queue = new FifoQueue();
 
-    // dom elements to show the output 
     let leaveWaitingRoom = document.getElementById("leaveWaitingRoom");
     let waitingRoom = document.getElementById("waitingRoom");
     let cuttingRoom = document.getElementById("cuttingRoom");
     let cuttingLeavingRoom = document.getElementById("cuttingLeavingRoom");
     let barberSleeping = document.getElementById("barberSleeping");
     let baberSl = document.getElementById("baberSl");
+    let cuttingLeaving = document.getElementById("cuttingLeaving");
 
-    let miliseconds = 3000;
-
-    // using async function to make the code wait for some time before executing next line of code
     setTimeout(async () => {
-        // loop to add the customers to the queue
         for (let i = 0; i < customers.length; i++) {
+            let time = new Date().toLocaleTimeString();
             if (waitting < chairs.length) {
                 queue.enqueue(customers[i]);
                 waitting++;
-                console.log(
-                    `Customer Entered the Waiting Room ${customers[i]
-                    } at ${new Date().toLocaleTimeString()}`
-                );
-                waitingRoom.innerHTML += `<div class="bg-blue-500 text-white py-2 px-4 rounded">Customer ${customers[i]
-                    } Entered the Waiting Room at ${new Date().toLocaleTimeString()}</div>`;
+                console.log(`Customer Entered the Waiting Room ${customers[i]} at ${time}`);
+                waitingRoom.innerHTML += `<div class="status-msg info">Customer ${customers[i]} Entered Waiting Room at ${time}</div>`;
             } else {
-                if (queue.size() === 0) {
-                    return;
-                } else {
-                    console.log(
-                        `Customer Left because of Full Waiting Room ${customers[i]
-                        } at ${new Date().toLocaleTimeString()}`
-                    );
-                    leaveWaitingRoom.innerHTML += `<div class="bg-red-500 text-white py-2 px-4 rounded">Customer Left because of Full Waiting Room ${customers[i]
-                        } at ${new Date().toLocaleTimeString()}</div>`;
-                }
+                console.log(`Customer Left because of Full Waiting Room ${customers[i]} at ${time}`);
+                leaveWaitingRoom.innerHTML += `<div class="status-msg error">Customer ${customers[i]} Left: Full Waiting Room at ${time}</div>`;
             }
         }
-    }, 2000);
+    }, 500);
 
-    // using async function to make the code wait for some time before executing next line of code
     setTimeout(async () => {
         if (waitting > 0) {
             for (let i = 0; i < waitting; i++) {
                 const customer = queue.dequeue();
-                waitingRoom.removeChild(waitingRoom.childNodes[0]);
-                if (i == waitting - 1) {
-                    waitingRoom.innerHTML += `<div class="bg-blue-500 text-white font-bold py-2 px-4 rounded">Waiting Room Empty at ${new Date().toLocaleTimeString()}</div>`;
+                
+                // Remove the top waiting message
+                if(waitingRoom.childNodes.length > 0) {
+                    waitingRoom.removeChild(waitingRoom.childNodes[0]);
                 }
-                cuttingLeaving.style.display = "block";
-                console.log(
-                    `Customer Hair Cut Started ${customer} at ${new Date().toLocaleTimeString()}`
-                );
-                cuttingRoom.innerHTML += `<div class="bg-green-500 text-white py-2 px-4 rounded">Barber Cutting Hair of ${customer} at ${new Date().toLocaleTimeString()}</div>`;
-                await sleep(2000);
-                console.log(
-                    `Customer Hair Cut Done ${customer} at ${new Date().toLocaleTimeString()}`
-                );
-                cuttingLeavingRoom.innerHTML += `<div class="bg-slate-800 text-white py-2 px-4 rounded">Customer ${customer} Left the Cutting Leaving Room at ${new Date().toLocaleTimeString()}</div>`;
-                await sleep(2000);
-                cuttingRoom.removeChild(cuttingRoom.childNodes[0]);
-                console.log(
-                    `Customer Left the Cutting Leaving Room ${customer} at ${new Date().toLocaleTimeString()}`
-                );
+                
+                let time = new Date().toLocaleTimeString();
                 if (i == waitting - 1) {
-                    cuttingRoom.innerHTML += `<div class="bg-green-500 text-white font-bold py-2 px-4 rounded">Hair Cut Room Empty at ${new Date().toLocaleTimeString()}</div>`;
+                    waitingRoom.innerHTML += `<div class="status-msg info-bold">Waiting Room Empty at ${time}</div>`;
                 }
+                cuttingLeaving.classList.remove("hidden");
+                
+                console.log(`Customer Hair Cut Started ${customer} at ${time}`);
+                cuttingRoom.innerHTML += `<div class="status-msg success">Barber Cutting Hair of ${customer} at ${time}</div>`;
+                
                 await sleep(2000);
+                time = new Date().toLocaleTimeString();
+                
+                console.log(`Customer Hair Cut Done ${customer} at ${time}`);
+                cuttingLeavingRoom.innerHTML += `<div class="status-msg default">Customer ${customer} Left After Cut at ${time}</div>`;
+                
+                await sleep(2000);
+                if(cuttingRoom.childNodes.length > 0) {
+                    cuttingRoom.removeChild(cuttingRoom.childNodes[0]);
+                }
+                
+                time = new Date().toLocaleTimeString();
+                if (i == waitting - 1) {
+                    cuttingRoom.innerHTML += `<div class="status-msg success-bold">Hair Cut Room Empty at ${time}</div>`;
+                }
+                await sleep(1000);
             }
         }
-        if (waitting == 0 || waitting == chairs.length) {
+        
+        let finalTime = new Date().toLocaleTimeString();
+        if (waitting == 0 || queue.size() == 0) {
             if (waitting == 0) {
-                waitingRoom.innerHTML += `<div class="bg-blue-500 text-white font-bold py-2 px-4 rounded">Waiting Room Empty at ${new Date().toLocaleTimeString()}</div>`;
-                cuttingRoom.innerHTML += `<div class="bg-green-500 text-white font-bold py-2 px-4 rounded">Hair Cut Room Empty at ${new Date().toLocaleTimeString()}</div>`;
+                waitingRoom.innerHTML += `<div class="status-msg info-bold">Waiting Room Empty at ${finalTime}</div>`;
+                cuttingRoom.innerHTML += `<div class="status-msg success-bold">Hair Cut Room Empty at ${finalTime}</div>`;
             }
-            baberSl.style.display = "block";
-            console.log(
-                `Barber Sleeping at ${new Date().toLocaleTimeString()} `
-            );
-            barberSleeping.innerHTML += `<div class="bg-yellow-500 text-white font-bold py-2 px-4 rounded">Barber Sleeping at ${new Date().toLocaleTimeString()}</div>`;
+            baberSl.classList.remove("hidden");
+            barberSleeping.innerHTML += `<div class="status-msg warning">Barber Sleeping at ${finalTime}</div>`;
         }
-    }, 2000);
+    }, 1000);
 }

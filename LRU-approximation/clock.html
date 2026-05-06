@@ -6,368 +6,84 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
     <title>Clock Algorithm - OS Visualizer</title>
+    <link rel="stylesheet" href="../../styles.css" />
 
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-        
-        body {
-            font-family: 'Outfit', sans-serif;
-            background: linear-gradient(135deg, rgba(173, 150, 220, 0.9), rgba(75, 192, 192, 0.9));
-            background-size: cover;
-            background-attachment: fixed;
-            color: #ffffff;
-            position: relative;
-            overflow-x: hidden;
-        }
-        
-        body::before {
-            content: "";
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"><defs><pattern id="dots" patternUnits="userSpaceOnUse" width="30" height="30"><circle cx="5" cy="5" r="1.5" fill="rgba(255, 255, 255, 0.2)"/></pattern></defs><rect width="100%" height="100%" fill="url(%23dots)"/></svg>');
-            pointer-events: none;
-            z-index: -1;
-        }
-        
-        nav {
-            background-color: rgba(98, 0, 234, 0.95);
-            height: 80px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            z-index: 1000;
-            padding: 0 5%;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-        
-        .logo {
-            font-size: 28px;
-            font-weight: 700;
-            color: #ffffff;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            padding: 10px 20px;
-            border-radius: 8px;
-            letter-spacing: 1px;
-        }
-        
-        .logo:hover {
-            background-color: rgba(133, 2, 247, 0.8);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-        
-        .nav-links {
-            list-style: none;
-            display: flex;
-            margin: 0;
-            padding: 0;
-        }
-        
-        .nav-links li {
-            margin: 0 5px;
-        }
-        
-        .nav-links a {
-            color: #ffffff;
-            text-decoration: none;
-            font-size: 18px;
-            font-weight: 600;
-            text-transform: uppercase;
-            padding: 10px 20px;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-        
-        .nav-links a:hover {
-            background-color: rgba(133, 2, 247, 0.8);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-        
-        main {
-            padding-top: 120px;
-            padding-bottom: 60px;
-            min-height: 100vh;
-        }
-        
-        .container {
-            width: 90%;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        .header {
-            text-align: center;
+        .app-panel {
+            background-color: var(--panel);
+            border: 1px solid var(--panel-border);
+            border-radius: var(--radius-md);
+            padding: 30px;
             margin-bottom: 30px;
-            padding: 40px;
-            background-color: rgba(15, 15, 15, 0.8);
-            border-radius: 20px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
         }
+        .app-panel h2 { color: var(--accent); margin-top: 0; font-size: 1.8rem; font-family: 'Space Grotesk', sans-serif; margin-bottom: 20px; }
+        .app-panel h3 { color: var(--accent-strong); margin-top: 25px; font-size: 1.3rem; margin-bottom: 10px; }
+        .app-panel p, .app-panel li { color: var(--muted); line-height: 1.6; margin-bottom: 10px; font-size: 1.05rem; }
+        .app-panel ol { padding-left: 20px; margin-bottom: 20px; }
         
-        .header h1 {
-            font-size: 3.5rem;
-            font-weight: 700;
-            margin-bottom: 20px;
-            color: #6200ea;
-            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        .features-grid { display: grid; grid-template-columns: 1fr; gap: 20px; margin-bottom: 30px; }
+        @media (min-width: 768px) { .features-grid { grid-template-columns: 1fr 1fr; } }
+        
+        .form-group { display: flex; flex-direction: column; margin-bottom: 20px; }
+        .form-group label { font-weight: 600; margin-bottom: 8px; font-size: 0.95rem; color: var(--text); }
+        .form-group input { 
+            background: #0f172a; border: 1px solid var(--panel-border); color: var(--text); 
+            padding: 14px; border-radius: 8px; font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.3s;
+            font-size: 1rem;
         }
+        .form-group input:focus { border-color: var(--accent); }
         
-        .header p {
-            font-size: 1.3rem;
-            line-height: 1.6;
-            color: #d1c4e9;
-            max-width: 800px;
-            margin: 0 auto;
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-strong), var(--accent));
+            color: #06111a; border: none; padding: 14px 24px; border-radius: 8px;
+            font-weight: 700; cursor: pointer; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 1px;
+            display: inline-block; margin-top: 10px;
         }
+        .btn-primary:hover { transform: translateY(-2px); filter: brightness(1.05); box-shadow: 0 10px 22px rgba(45, 212, 191, 0.2); }
         
-        .overview-section {
-            background-color: rgba(209, 196, 233, 0.9);
-            color: #000000;
-            padding: 30px;
-            border-radius: 16px;
-            margin-bottom: 30px;
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
-        }
-        
-        .overview-section h2 {
-            color: #6200ea;
-            margin-bottom: 20px;
-            font-size: 2.2rem;
-        }
-        
-        .overview-section h3 {
-            color: #8502f7;
-            margin: 20px 0 10px;
-            font-size: 1.8rem;
-        }
-        
-        .overview-section p, .overview-section li {
-            font-size: 1.1rem;
-            line-height: 1.6;
-            margin-bottom: 10px;
-        }
-        
-        .overview-section ol {
-            padding-left: 20px;
-            margin-bottom: 20px;
-        }
-        
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 30px;
-            margin-bottom: 30px;
-        }
-        
-        .feature-card {
-            background-color: rgba(209, 196, 233, 0.9);
-            color: #000000;
-            padding: 25px;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
-        }
-        
-        .feature-card:hover {
-            transform: translateY(-5px);
-        }
-        
-        .feature-card h3 {
-            color: #6200ea;
-            margin-bottom: 15px;
-            font-size: 1.8rem;
-        }
-        
-        .simulator-section {
-            background-color: rgba(15, 15, 15, 0.8);
-            padding: 30px;
-            border-radius: 16px;
-            margin-bottom: 30px;
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
-        }
-        
-        .simulator-section h2 {
-            color: #6200ea;
-            margin-bottom: 25px;
-            font-size: 2.2rem;
-            text-align: center;
-        }
-        
-        .input-group {
-            margin-bottom: 20px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 10px;
-            font-size: 1.2rem;
-            color: #d1c4e9;
-        }
-        
-        input[type="number"], input[type="text"] {
-            width: 100%;
-            padding: 12px 15px;
-            font-size: 1.1rem;
-            border: none;
-            border-radius: 8px;
-            background-color: rgba(255, 255, 255, 0.9);
-            margin-bottom: 15px;
-            font-family: 'Outfit', sans-serif;
-        }
-        
-        button {
-            background-color: #6200ea;
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            border-radius: 8px;
-            cursor: pointer;
+        #frame-container { display: flex; flex-wrap: wrap; gap: 15px; margin: 25px 0; }
+        .frame-box {
+            background-color: rgba(255, 255, 255, 0.05); color: var(--text);
+            padding: 15px 20px; border-radius: 10px; min-width: 120px; text-align: center;
+            border: 1px solid var(--panel-border); font-weight: 600; font-size: 1.1rem;
             transition: all 0.3s ease;
-            font-family: 'Outfit', sans-serif;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 20px;
         }
-        
-        button:hover {
-            background-color: #8502f7;
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-        
-        #frame-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            margin: 20px 0;
-        }
-        
-        .frame {
-            background-color: rgba(209, 196, 233, 0.9);
-            color: #000000;
-            padding: 15px 20px;
-            border-radius: 10px;
-            min-width: 120px;
-            text-align: center;
-            font-weight: 500;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
+        .frame-box.hit { border-color: #10b981; background-color: rgba(16, 185, 129, 0.15); box-shadow: 0 0 15px rgba(16, 185, 129, 0.2); }
+        .frame-box.miss { border-color: #ef4444; background-color: rgba(239, 68, 68, 0.15); box-shadow: 0 0 15px rgba(239, 68, 68, 0.2); }
         
         #replacement-log {
-            background-color: rgba(209, 196, 233, 0.9);
-            color: #000000;
-            padding: 20px;
-            border-radius: 10px;
-            margin-top: 20px;
-            max-height: 300px;
-            overflow-y: auto;
+            background-color: #0b1321; border: 1px solid var(--panel-border);
+            padding: 20px; border-radius: 10px; margin-top: 25px; max-height: 350px; overflow-y: auto;
         }
-        
-        #replacement-log p {
-            margin-bottom: 10px;
-            font-size: 1.1rem;
-            line-height: 1.5;
-            padding: 8px;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-        }
-        
-        .floating-shape {
-            position: absolute;
-            opacity: 0.4;
-            z-index: -1;
-        }
-        
-        .shape1 {
-            top: 15%;
-            left: 10%;
-            width: 150px;
-            height: 150px;
-            border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
-            background-color: rgba(133, 2, 247, 0.6);
-            animation: float 12s ease-in-out infinite;
-        }
-        
-        .shape2 {
-            bottom: 20%;
-            right: 15%;
-            width: 180px;
-            height: 180px;
-            border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
-            background-color: rgba(75, 192, 192, 0.6);
-            animation: float 15s ease-in-out infinite;
-        }
-        
-        @keyframes float {
-            0% {
-                transform: translateY(0) rotate(0deg);
-            }
-            50% {
-                transform: translateY(-20px) rotate(10deg);
-            }
-            100% {
-                transform: translateY(0) rotate(0deg);
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .header h1 {
-                font-size: 2.5rem;
-            }
-            
-            .features-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .nav-links a {
-                font-size: 16px;
-                padding: 8px 15px;
-            }
-            
-            .logo {
-                font-size: 24px;
-            }
-        }
+        .log-entry { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); color: var(--text); font-size: 0.95rem; line-height: 1.5; }
+        .log-entry:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .log-entry.hit { color: #6ee7b7; background-color: rgba(16, 185, 129, 0.1); padding: 8px 12px; border-radius: 6px; border: none; margin-bottom: 8px;}
+        .log-entry.miss { color: #fca5a5; background-color: rgba(239, 68, 68, 0.1); padding: 8px 12px; border-radius: 6px; border: none; margin-bottom: 8px;}
+        .log-entry.info { color: #7dd3fc; background-color: rgba(56, 189, 248, 0.1); padding: 8px 12px; border-radius: 6px; border: none; margin-bottom: 8px;}
+        .log-entry.highlight { color: var(--accent); font-weight: 600; font-size: 1.1rem; }
     </style>
 </head>
 <body>
-    <div class="floating-shape shape1"></div>
-    <div class="floating-shape shape2"></div>
+    <div class="container">
+        <header class="navbar">
+            <div class="logo">OS Explorer</div>
+            <nav>
+                <a href="../../index.html">Home</a>
+                <a href="lru-approx.html">Back to LRU Approx</a>
+            </nav>
+        </header>
 
-    <nav>
-        <a class="logo" href="../index.html">OS VISUALIZER</a>
-        <ul class="nav-links">
-            <li><a href="../index.html">Home</a></li>
-            <li><a href="../about.html">About</a></li>
-            <li><a href="lru-approx.html">Back to LRU Approx</a></li>
-        </ul>
-    </nav>
-
-    <main>
-        <div class="container">
-            <div class="header">
-                <h1>Clock Algorithm</h1>
-                <p>A visualization of the Clock Algorithm (Second Chance Algorithm) used for page replacement in operating systems.</p>
+        <section style="margin-top: 40px;">
+            <div style="text-align: center; margin-bottom: 40px;">
+                <h1 style="font-family: 'Space Grotesk', sans-serif; font-size: clamp(2.5rem, 5vw, 4rem); margin-bottom: 15px; color: var(--text); letter-spacing: -0.03em;">Clock Algorithm</h1>
+                <p style="color: var(--muted); font-size: 1.15rem; max-width: 800px; margin: 0 auto; line-height: 1.6;">A visualization of the Clock Algorithm (Second Chance Algorithm) used for page replacement in operating systems.</p>
             </div>
             
-            <div class="overview-section">
-                <h2>Clock Algorithm Overview</h2>
+            <div class="app-panel">
+                <h2>Algorithm Overview</h2>
                 <p>
                     The Clock Algorithm, also known as the Second Chance Algorithm, is a page replacement algorithm used in operating systems for managing memory.
                 </p>
@@ -383,64 +99,78 @@
             </div>
             
             <div class="features-grid">
-                <div class="feature-card">
-                    <h3>Advantages</h3>
+                <div class="app-panel" style="margin-bottom: 0;">
+                    <h2>Advantages</h2>
                     <ol>
-                        <li>Simple Implementation: The Clock Algorithm is relatively easy to implement compared to some other page replacement algorithms like LRU (Least Recently Used).</li>
-                        <li>Low Overhead: It requires minimal additional memory overhead, as it only requires a single reference bit per page.</li>
+                        <li><strong>Simple Implementation:</strong> The Clock Algorithm is relatively easy to implement compared to some other page replacement algorithms like LRU (Least Recently Used).</li>
+                        <li><strong>Low Overhead:</strong> It requires minimal additional memory overhead, as it only requires a single reference bit per page.</li>
                     </ol>
                 </div>
                 
-                <div class="feature-card">
-                    <h3>Disadvantages</h3>
+                <div class="app-panel" style="margin-bottom: 0;">
+                    <h2>Disadvantages</h2>
                     <ol>
-                        <li>Not Optimal: The Clock Algorithm may not always make the optimal replacement decision, as it does not consider the frequency or recency of page accesses beyond a binary "referenced" or "not referenced" status.</li>
-                        <li>Potential for Thrashing: In situations where the number of frames is insufficient to hold all the necessary pages, the Clock Algorithm may not effectively prioritize pages for retention, potentially leading to thrashing.</li>
-                        <li>Starvation: Pages with a high reference frequency may continue to be given a "second chance" indefinitely, leading to potential starvation for other pages waiting to be brought into memory.</li>
+                        <li><strong>Not Optimal:</strong> The Clock Algorithm may not always make the optimal replacement decision, as it does not consider the frequency or recency of page accesses beyond a binary "referenced" or "not referenced" status.</li>
+                        <li><strong>Potential for Thrashing:</strong> In situations where the number of frames is insufficient to hold all the necessary pages, the Clock Algorithm may not effectively prioritize pages for retention, potentially leading to thrashing.</li>
+                        <li><strong>Starvation:</strong> Pages with a high reference frequency may continue to be given a "second chance" indefinitely, leading to potential starvation for other pages waiting to be brought into memory.</li>
                     </ol>
                 </div>
             </div>
             
-            <div class="simulator-section">
+            <div class="app-panel">
                 <h2>Clock Algorithm Simulator</h2>
                 
-                <div class="input-group">
+                <div class="form-group">
                     <label for="frame-count">Enter the number of frames in memory:</label>
-                    <input type="number" id="frame-count">
-                    <button onclick="createFrames()">Create Frames</button>
+                    <input type="number" id="frame-count" min="1" placeholder="e.g. 3 or 4">
+                    <div>
+                        <button class="btn-primary" onclick="createFrames()">Create Frames</button>
+                    </div>
                 </div>
                 
                 <div id="frame-container"></div>
                 
-                <div class="input-group">
+                <div class="form-group" style="margin-top: 30px;">
                     <label for="page-reference">Enter the sequence of page references (comma-separated numbers):</label>
                     <input type="text" id="page-reference" placeholder="Example: 1,2,3,4,1,2,5,1,2,3,4,5">
-                    <button onclick="replacePage()">Simulate Page Replacement</button>
+                    <div>
+                        <button class="btn-primary" onclick="replacePage()">Simulate Page Replacement</button>
+                    </div>
                 </div>
                 
-                <div id="replacement-log"></div>
+                <div id="replacement-log">
+                    <div class="log-entry" style="color: var(--muted); text-align: center; border: none;">Simulation logs will appear here</div>
+                </div>
             </div>
-        </div>
-    </main>
+        </section>
+    </div>
 
     <script>
         var memoryFrames = [];
         var pointer = 0;
 
         function createFrames() {
-            var frameCount = parseInt(document.getElementById("frame-count").value);
+            var frameCountInput = document.getElementById("frame-count").value;
+            var frameCount = parseInt(frameCountInput);
+            
+            if (isNaN(frameCount) || frameCount <= 0) {
+                alert("Please enter a valid number of frames.");
+                return;
+            }
+            
             var frameContainer = document.getElementById("frame-container");
 
             // Clear existing frames and logs
             frameContainer.innerHTML = "";
-            document.getElementById("replacement-log").innerHTML = "";
+            document.getElementById("replacement-log").innerHTML = '<div class="log-entry" style="color: var(--muted); text-align: center; border: none;">Waiting for simulation...</div>';
             memoryFrames = [];
+            pointer = 0;
 
             // Create frame elements
             for (var i = 0; i < frameCount; i++) {
                 var frame = document.createElement("div");
-                frame.className = "frame";
-                frame.innerHTML = "Frame " + i + ": Empty";
+                frame.className = "frame-box";
+                frame.innerHTML = "Frame " + i + ":<br><span style='color:var(--muted); font-size:0.9rem'>Empty</span>";
                 frameContainer.appendChild(frame);
                 memoryFrames.push({ page_id: null, referenced: false, element: frame });
             }
@@ -451,71 +181,85 @@
                 alert("Please create frames first!");
                 return;
             }
+            
+            var seqString = document.getElementById("page-reference").value.trim();
+            if(!seqString) {
+                alert("Please enter a sequence of page references.");
+                return;
+            }
 
-            var sequence = document.getElementById("page-reference").value.split(",").map(Number);
+            var sequence = seqString.split(",").map(s => parseInt(s.trim())).filter(n => !isNaN(n));
             var replacementLog = document.getElementById("replacement-log");
             replacementLog.innerHTML = ""; // Clear previous logs
             var pageHit = 0;
             var pageMiss = 0;
 
-            // Iterate through page reference sequence
+            // Optional: reset styling of frames before simulating
+            memoryFrames.forEach(f => {
+                f.element.className = "frame-box"; 
+            });
+
+            // Simulate asynchronously to create an animation effect?? 
+            // In original it ran instantly, let's keep it instant but nicely formatted.
+            
             for (var i = 0; i < sequence.length; i++) {
                 var page_id = sequence[i];
                 
-                // Check if page is already in memory
                 var pageFound = false;
                 for (var j = 0; j < memoryFrames.length; j++) {
                     if (memoryFrames[j].page_id === page_id) {
                         memoryFrames[j].referenced = true;
                         pageHit++;
                         pageFound = true;
-                        replacementLog.innerHTML += "<p>Page " + page_id + " was found in memory. Page Hit!</p>";
+                        replacementLog.innerHTML += `<div class="log-entry hit">Page <strong>${page_id}</strong> was found in memory. Page Hit!</div>`;
+                        // Update styling
+                        memoryFrames[j].element.className = "frame-box hit";
+                        memoryFrames[j].element.innerHTML = `Frame ${j}:<br><span style="color:#10b981;">Page ${page_id}</span><br><span style="font-size:0.8rem">(Ref: 1)</span>`;
                         break;
                     }
                 }
 
-                // If page not found in memory, perform page replacement
                 if (!pageFound) {
                     pageMiss++;
                     var replacementDone = false;
                     
-                    // Find a frame with referenced bit 0 or set referenced bits to 0 as we scan
                     while (!replacementDone) {
                         if (memoryFrames[pointer].page_id === null) {
-                            // Empty frame found, place page here
                             memoryFrames[pointer].page_id = page_id;
                             memoryFrames[pointer].referenced = true;
-                            memoryFrames[pointer].element.innerHTML = "Frame " + pointer + ": Page " + page_id;
-                            replacementLog.innerHTML += "<p>Page " + page_id + " loaded into empty frame " + pointer + ".</p>";
+                            memoryFrames[pointer].element.innerHTML = `Frame ${pointer}:<br><span style="color:#ef4444;">Page ${page_id}</span><br><span style="font-size:0.8rem">(Ref: 1)</span>`;
+                            memoryFrames[pointer].element.className = "frame-box miss";
+                            replacementLog.innerHTML += `<div class="log-entry info">Page <strong>${page_id}</strong> loaded into empty frame ${pointer}.</div>`;
                             replacementDone = true;
                         } else if (!memoryFrames[pointer].referenced) {
-                            // Frame with referenced bit 0 found, replace
                             var oldPage = memoryFrames[pointer].page_id;
                             memoryFrames[pointer].page_id = page_id;
                             memoryFrames[pointer].referenced = true;
-                            memoryFrames[pointer].element.innerHTML = "Frame " + pointer + ": Page " + page_id;
-                            replacementLog.innerHTML += "<p>Page " + page_id + " replaced page " + oldPage + " in frame " + pointer + ".</p>";
+                            memoryFrames[pointer].element.innerHTML = `Frame ${pointer}:<br><span style="color:#ef4444;">Page ${page_id}</span><br><span style="font-size:0.8rem">(Ref: 1)</span>`;
+                            memoryFrames[pointer].element.className = "frame-box miss";
+                            replacementLog.innerHTML += `<div class="log-entry miss">Page <strong>${page_id}</strong> replaced page ${oldPage} in frame ${pointer}.</div>`;
                             replacementDone = true;
                         } else {
-                            // Give second chance
                             memoryFrames[pointer].referenced = false;
-                            replacementLog.innerHTML += "<p>Frame " + pointer + " contains recently used page " + memoryFrames[pointer].page_id + ". Giving second chance.</p>";
+                            replacementLog.innerHTML += `<div class="log-entry info" style="opacity: 0.8">Frame ${pointer} contains recently used page ${memoryFrames[pointer].page_id}. Giving second chance (Ref set to 0).</div>`;
+                            memoryFrames[pointer].element.innerHTML = `Frame ${pointer}:<br><span>Page ${memoryFrames[pointer].page_id}</span><br><span style="font-size:0.8rem; color:var(--muted);">(Ref: 0)</span>`;
+                            memoryFrames[pointer].element.className = "frame-box";
                         }
                         
                         pointer = (pointer + 1) % memoryFrames.length;
-                        
-                        // If we've checked all frames and none are available, start replacing frames with reference bit 0
-                        if (pointer === 0 && !replacementDone) {
-                            // This will exit on the next iteration as we've reset reference bits
-                        }
                     }
                 }
             }
 
-            replacementLog.innerHTML += "<p><strong>Simulation Complete!</strong></p>";
-            replacementLog.innerHTML += "<p><strong>Total Page Hits:</strong> " + pageHit + "</p>";
-            replacementLog.innerHTML += "<p><strong>Total Page Misses:</strong> " + pageMiss + "</p>";
-            replacementLog.innerHTML += "<p><strong>Hit Ratio:</strong> " + (pageHit / (pageHit + pageMiss)).toFixed(2) + "</p>";
+            var hitRatio = sequence.length === 0 ? 0 : (pageHit / (pageHit + pageMiss));
+            replacementLog.innerHTML += `
+                <div class="log-entry highlight" style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; display: flex; flex-direction:column; gap:8px;">
+                    <div>Simulation Complete!</div>
+                    <div style="color:var(--text); font-weight:normal; font-size:1rem">Total Page Hits: <strong style="color:#10b981">${pageHit}</strong></div>
+                    <div style="color:var(--text); font-weight:normal; font-size:1rem">Total Page Misses: <strong style="color:#ef4444">${pageMiss}</strong></div>
+                    <div style="color:var(--text); font-weight:normal; font-size:1rem">Hit Ratio: <strong>${hitRatio.toFixed(2)}</strong></div>
+                </div>
+            `;
         }
     </script>
 </body>
