@@ -12,12 +12,13 @@
 
     <style>
         .app-panel {
-            background-color: var(--panel);
-            border: 1px solid var(--panel-border);
-            border-radius: var(--radius-md);
+            background-color: var(--panel, rgba(15, 25, 42, 0.86));
+            border: 1px solid var(--panel-border, rgba(255, 255, 255, 0.08));
+            border-radius: var(--radius-md, 18px);
             padding: 30px;
             margin-bottom: 30px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(18px);
         }
         .app-panel h2 { color: var(--accent); margin-top: 0; font-size: 1.8rem; font-family: 'Space Grotesk', sans-serif; margin-bottom: 20px; }
         .app-panel h3 { color: var(--accent-strong); margin-top: 25px; font-size: 1.3rem; margin-bottom: 10px; }

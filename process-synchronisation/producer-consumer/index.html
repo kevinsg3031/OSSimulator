@@ -1,61 +1,197 @@
 <!doctype html>
-
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Producer-Consumer simulation</title>
+  <title>Producer-Consumer simulation - OS Visualizer</title>
   <meta name="description" content="Producer-Consumer problem visualization">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../styles.css">
+
+  <style>
+    .sim-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+      margin-top: 40px;
+      justify-content: center;
+    }
+    
+    .panel-left {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: var(--shadow);
+      flex: 1;
+      max-width: 450px;
+      min-width: 320px;
+    }
+
+    .panel-right {
+      flex: 2;
+      min-width: 320px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+    
+    .settings-table {
+      width: 100%;
+      margin-bottom: 25px;
+    }
+    
+    .settings-table td {
+      padding: 10px 0;
+      color: #cbd5e1;
+      font-weight: 500;
+    }
+    
+    .settings-table input {
+      width: 100%;
+      background: #0f172a;
+      border: 1px solid var(--border-color);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+
+    .settings-table input:focus {
+      border-color: var(--accent);
+    }
+    
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    
+    button#options-apply {
+      padding: 12px 24px;
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: 'Inter', sans-serif;
+      background-color: var(--accent);
+      color: #06111a;
+      width: 100%;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    button#options-apply:hover {
+      background-color: #9ef4e8;
+      transform: translateY(-2px);
+    }
+
+    .presets {
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-top: 15px;
+    }
+
+    .presets a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.3s;
+    }
+
+    .presets a:hover {
+      color: #9ef4e8;
+    }
+
+    #canvas-container {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+    
+    canvas {
+      max-width: 100%;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 
 <body>
-  <div class="container-2">
-  <div style="display: flex;">  
-  
   <div class="container">
-    <h1>Producer-Consumer Problem</h1>
-    <table>
-      <tr>
-        <td>Producing delay min</td>
-        <td><input id="prod-delay-min" type="number" min="200" step="100" class="form-control form-control-sm"></td>
-      </tr>
+    <header class="navbar">
+      <div class="logo">OS Explorer</div>
+      <nav>
+          <a href="../../index.html">Home</a>
+          <a href="../index.html">Back to Modules</a>
+      </nav>
+    </header>
 
-      <tr>
-        <td>Producing delay max</td>
-        <td><input id="prod-delay-max" type="number" min="200" step="100" class="form-control form-control-sm"></td>
-      </tr>
+    <div class="hero" style="padding: 30px; text-align: center; margin-bottom: 20px;">
+      <h1 style="font-size: 2.5rem; margin-bottom: 10px;">Producer-Consumer Problem</h1>
+      <p style="color: var(--muted); max-width: 600px; margin: 0 auto;">Visualize the synchronization between a producer adding data to a bounded buffer and a consumer removing it.</p>
+    </div>
 
-      <tr>
-        <td>Consuming delay min</td>
-        <td><input id="cons-delay-min" type="number" min="200" step="100" class="form-control form-control-sm"></td>
-      </tr>
+    <div class="sim-container">
+      <div class="panel-left">
+        <table class="settings-table">
+          <tr>
+            <td>Producing delay min</td>
+            <td><input id="prod-delay-min" type="number" min="200" step="100"></td>
+          </tr>
+          <tr>
+            <td>Producing delay max</td>
+            <td><input id="prod-delay-max" type="number" min="200" step="100"></td>
+          </tr>
+          <tr>
+            <td>Consuming delay min</td>
+            <td><input id="cons-delay-min" type="number" min="200" step="100"></td>
+          </tr>
+          <tr>
+            <td>Consuming delay max</td>
+            <td><input id="cons-delay-max" type="number" min="200" step="100"></td>
+          </tr>
+          <tr>
+            <td>Produce chunks</td>
+            <td><input id="chunks-count" type="number" min="1"></td>
+          </tr>
+          <tr>
+            <td>Queue capacity</td>
+            <td><input id="queue-cap" type="number" min="1" max="6"></td>
+          </tr>
+        </table>
 
-      <tr>
-        <td>Consuming delay max</td>
-        <td><input id="cons-delay-max" type="number" min="200" step="100" class="form-control form-control-sm"></td>
-      </tr>
+        <div class="controls">
+          <button id="options-apply">Apply & Start</button>
+        </div>
+        
+        <div class="presets">
+          Presets: 
+          <a href="javascript: void 0" id="preset-fpsc">Fast&rarr;Slow</a> / 
+          <a href="javascript: void 0" id="preset-spfc">Slow&rarr;Fast</a> / 
+          <a href="javascript: void 0" id="preset-random">Random</a>
+        </div>
+      </div>
 
-      <tr>
-        <td>Produce chunks</td>
-        <td><input id="chunks-count" type="number" min="1" class="form-control form-control-sm"></td>
-      </tr>
-
-      <tr>
-        <td>Queue capacity</td>
-        <td><input id="queue-cap" type="number" min="1" max="6" class="form-control form-control-sm"></td>
-      </tr>
-    </table>
-
-    <button id="options-apply" class="btn btn-primary">Apply</button> ...or use preset: <a href="javascript: void 0" id="preset-fpsc" class="btn-preset">Fast&rarr;Slow</a> / <a href="javascript: void 0" id="preset-spfc" class="btn-preset">Slow&rarr;Fast</a> / <a href="javascript: void 0" id="preset-random" class="btn-preset">Random</a>
-  </div>
-
-  <div id="canvas-container" style="width: 50%; float: right;">
-    <canvas id="canvas"></canvas>
-  </div>
-  </div>
+      <div class="panel-right">
+        <div id="canvas-container">
+          <canvas id="canvas"></canvas>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script src="model.js"></script>

@@ -1,514 +1,474 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="utf-8">
-  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dining Philosophers Simulation - OS Visualizer</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../styles.css">
 
+  <style>
+    .sim-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 40px;
+      margin-top: 40px;
+      justify-content: center;
+    }
+    
+    .panel-left, .panel-right {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: var(--shadow);
+      flex: 1;
+      min-width: 300px;
+    }
+    
+    .panel-left {
+      max-width: 500px;
+    }
+    
+    .panel-right {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .status-box {
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      color: #38bdf8;
+      padding: 15px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 25px;
+      font-size: 1.1rem;
+      width: 100%;
+    }
+    
+    .state-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 30px;
+    }
+    
+    .state-table th, .state-table td {
+      padding: 12px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .state-table th {
+      color: var(--accent);
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+    
+    .state-table td {
+      color: #cbd5e1;
+    }
+    
+    .state-table tbody tr:hover {
+      background-color: rgba(255,255,255,0.03);
+    }
+    
+    .controls {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+    }
+    
+    button {
+      padding: 12px 24px;
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: 'Inter', sans-serif;
+      background-color: var(--accent);
+      color: #06111a;
+    }
+    
+    button:hover {
+      background-color: #9ef4e8;
+      transform: translateY(-2px);
+    }
+    
+    #startAuto.active {
+      background-color: #ef4444;
+      color: white;
+    }
 
-  <meta content="" name="description">
-  <meta content="" name="keywords">
+    /* Dining Table Visualization */
+    .dining-area {
+      position: relative;
+      width: 350px;
+      height: 350px;
+      margin: 40px auto;
+    }
+    
+    .table-center {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 160px;
+      height: 160px;
+      background: #1e293b;
+      border: 4px solid #334155;
+      border-radius: 50%;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+    }
 
-  <!-- Favicons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    /* Philosophers */
+    .philosopher {
+      position: absolute;
+      width: 70px;
+      height: 70px;
+      background-color: #DCDCDC;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: #0f172a;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      transition: background-color 0.3s ease;
+      z-index: 10;
+    }
+    
+    /* Forks */
+    .fork {
+      position: absolute;
+      width: 4px;
+      height: 40px;
+      background-color: #DCDCDC;
+      border-radius: 2px;
+      transition: background-color 0.3s ease;
+      z-index: 5;
+    }
+    
+    /* Bowls */
+    .bowl {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      background-color: #f59e0b; /* spaghetti color */
+      border-radius: 50%;
+      visibility: hidden;
+      border: 2px solid #fff;
+      z-index: 15;
+    }
 
-  <!-- Google Fonts -->
-  <link
-    href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Raleway:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i"
-    rel="stylesheet">
+    /* Positions based on circular geometry */
+    #one { top: -10px; left: 140px; }
+    #two { top: 90px; left: 290px; }
+    #three { top: 280px; left: 230px; }
+    #four { top: 280px; left: 50px; }
+    #five { top: 90px; left: -10px; }
 
-  <!-- Template Main CSS File -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    #first { top: 40px; left: 240px; transform: rotate(36deg); }
+    #second { top: 210px; left: 280px; transform: rotate(108deg); }
+    #third { top: 310px; left: 140px; transform: rotate(180deg); }
+    #fourth { top: 210px; left: 20px; transform: rotate(252deg); }
+    #fifth { top: 40px; left: 60px; transform: rotate(324deg); }
 
-  <!-- EXTRA LINKS -->
+    #bowl1 { top: 70px; left: 160px; }
+    #bowl2 { top: 140px; left: 220px; }
+    #bowl3 { top: 210px; left: 195px; }
+    #bowl4 { top: 210px; left: 125px; }
+    #bowl5 { top: 140px; left: 100px; }
 
-  <link rel="stylesheet" href="./bootstrap.min.css">
-  <link href="https://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet">
+    .legend {
+      display: flex;
+      gap: 15px;
+      margin-top: 20px;
+      font-size: 0.9rem;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .legend-color {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+    }
 
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-
-
-  <!-- SCRIPT FOR THE PAGE-->
-  <title>Dining Philosopher's Simulation</title>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-
-</style>
-<style>
-  #dining-controls{position:absolute;top:20%;right:5%;display:flex;gap:12px;flex-wrap:wrap;align-items:center;z-index:5}
-  #dining-controls .control-btn{height:60px;width:140px;background-color: rgb(44, 165, 252);border: none;font-size:20px;color:white;cursor:pointer;border-radius:10px}
-  @media (max-width:700px){
-    #dining-controls{position:static;margin-top:10px;right:auto;top:auto;justify-content:center;gap:8px}
-  }
-</style>
+  </style>
 </head>
 
-<body style=" background-image: url('../background.jpg');background-size: cover">
-  <!-- ======= Header ======= -->
-  <div style="background: rgba(255, 255, 255, 0.6); padding: 40px 40px;">
-  <h1 style="margin-top: 2%; margin-left: 2%;">Dining Philosophers' Problem</h1>
-  
-  <div style="padding: 25%;">
+<body>
+  <div class="container">
+    <header class="navbar">
+      <div class="logo">OS Explorer</div>
+      <nav>
+          <a href="../../index.html">Home</a>
+          <a href="../index.html">Back to Modules</a>
+      </nav>
+    </header>
 
-    <button type="button" , id="num" , name="num" , class="btn btn-primary" ,
-      style="height:70px;width:300px;position:absolute;top:36%;left:75%;font-size:17px ;background-color: rgb(90, 122, 235);">Number
-      generated: </button>
+    <div class="hero" style="padding: 30px; text-align: center; margin-bottom: 20px;">
+      <h1 style="font-size: 2.5rem; margin-bottom: 10px;">Dining Philosophers Problem</h1>
+      <p style="color: var(--muted); max-width: 600px; margin: 0 auto;">Observe how philosophers transition between thinking, hungry, and eating states while acquiring and releasing shared resources (forks) without deadlock.</p>
+    </div>
 
-
-    <!-- <p id="hungry1" style="position:absolute;top:60%;right:23%; font-size: 25px">ter</p>
-        <p id="eating1" style="position:absolute;top:60%;right:3%; font-size: 25px">ter</p>
-     -->
-    <div style="position:absolute;top:50%;left:70%;background-color: rgb(87, 156, 234);">
-
-      <!-- <table  style="font-size:25px;width:100%"> -->
-
-        <table class="table" style="position: absolute; top: 10px; left:2px">
+    <div class="sim-container">
+      
+      <div class="panel-left">
+        <div id="num" class="status-box">Status: Waiting to start...</div>
+        
+        <table class="state-table">
           <thead>
             <tr>
-              <th scope="col" >Philosopher </th>
-              <th scope="col" >Thinking</th>
-              <th scope="col">Hungry</th>
-              <th scope="col">Eating</th>
+              <th>Philosopher</th>
+              <th>Thinking</th>
+              <th>Hungry</th>
+              <th>Eating</th>
             </tr>
           </thead>
-          <tbody class="table-group-divider">
-            <tr scope ="row" style="background-color: #a6e5e5	">
-              <td width="120px" height="30px" style="text-align: center;">1</td>
-              <td width="120px" height="30px" style="text-align: center;" id="t11">Yes</td>
-              <td width="120px" height="30px" style="text-align: center;" id="t12">-</td>
-              <td width="120px" height="30px" style="text-align: center;" id="t13">-</td>
-    
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td id="t11">Yes</td>
+              <td id="t12">-</td>
+              <td id="t13">-</td>
             </tr>
-            <tr scope ="row"  style="background-color: #b4b5f0	">
-              <td width="120px" height="30px" style="text-align: center;">2</td>
-              <td width="120px" height="30px" style="text-align: center;" id="t21">Yes</td>
-              <td width="120px" height="30px" style="text-align: center;" id="t22">-</td>
-              <td width="120px" height="30px" style="text-align: center;" id="t23">-</td>
-    
+            <tr>
+              <td>2</td>
+              <td id="t21">Yes</td>
+              <td id="t22">-</td>
+              <td id="t23">-</td>
             </tr>
-            <tr scope ="row" style="background-color:  #a6e5e5	">
-              <td width="120px" height="30px" style="text-align: center;">3</td>
-              <td id="t31" width="120px" height="30px" style="text-align: center;">Yes</td>
-              <td id="t32" width="120px" height="30px" style="text-align: center;">-</td>
-              <td id="t33" width="120px" height="30px" style="text-align: center;">-</td>
-    
+            <tr>
+              <td>3</td>
+              <td id="t31">Yes</td>
+              <td id="t32">-</td>
+              <td id="t33">-</td>
             </tr>
-            <tr scope ="row" style="background-color: #b4b5f0	">
-              <td width="120px" height="30px" style="text-align: center;">4</td>
-              <td id="t41" width="120px" height="30px" style="text-align: center;">Yes</td>
-              <td id="t42" width="120px" height="30px" style="text-align: center;">-</td>
-              <td id="t43" width="120px" height="30px" style="text-align: center;">-</td>
-    
+            <tr>
+              <td>4</td>
+              <td id="t41">Yes</td>
+              <td id="t42">-</td>
+              <td id="t43">-</td>
             </tr>
-            <tr scope ="row" style="background-color:  #a6e5e5	">
-              <td width="120px" height="30px" style="text-align: center;">5</td>
-              <td id="t51" width="120px" height="30px" style="text-align: center;">Yes</td>
-              <td id="t52" width="120px" height="30px" style="text-align: center;">-</td>
-              <td id="t53" width="120px" height="30px" style="text-align: center;">-</td>
-    
+            <tr>
+              <td>5</td>
+              <td id="t51">Yes</td>
+              <td id="t52">-</td>
+              <td id="t53">-</td>
             </tr>
           </tbody>
         </table>
-    </div>
 
-    <p style="position:absolute;top:16%;left:41%;">Philosopher 1</p>
-    <p style="position:absolute;top:42%;left:29%;">Philosopher 5</p>
-    <p style="position:absolute;top:27%;left:56.5%;">Philosopher 2</p>
-    <p style="position:absolute;top:88%;left:37.8%;">Philosopher 4</p>
-    <p style="position:absolute;top:80%;left:56%;">Philosopher 3</p>
-
-    
-
-    <button type="button" , id="one" , name="one" ,
-      style="height:125px;width:125px;position: absolute;top:19%;left:40%;border-radius:125px;border: none;  background-image: url('https://icons.iconarchive.com/icons/microsoft/fluentui-emoji-3d/256/Old-Man-3d-Light-icon.png'); background-size: cover; color: white;">
-      </button>
-
-    <button type="button" , id="five" , name="one" ,
-      style="height:125px;width:125px;position:absolute;top:45%;left:29%;border-radius:125px;border: none; background-image: url('https://icons.iconarchive.com/icons/microsoft/fluentui-emoji-3d/256/Old-Woman-3d-Light-icon.png'); background-size: cover;">
-    </button>
-
-    <button type="button" , id="two" , name="one" ,
-      style="height:125px;width:125px;position:absolute;top:30%;left:55.5%;border-radius:125px;border: none;background-image: url('https://icons.iconarchive.com/icons/microsoft/fluentui-emoji-3d/256/Old-Man-3d-Medium-icon.png'); background-size: cover">
-    </button>
-
-    <button type="button" , id="four" , name="one" ,
-      style="height:125px;width:125px;position:absolute;top:72%;left:37%;border-radius:125px;border: none;background-image: url('https://icons.iconarchive.com/icons/microsoft/fluentui-emoji-3d/256/Old-Man-3d-Medium-Dark-icon.png'); background-size: cover">
-    </button>
-
-    <button type="button" , id="three" , name="one" ,
-      style="height:125px;width:125px;position:absolute;top:63%;left:55%;border-radius:125px;border: none;background-image: url('https://icons.iconarchive.com/icons/microsoft/fluentui-emoji-3d/256/Old-Woman-3d-Medium-Light-icon.png'); background-size: cover">
-    </button>
-
-  
-    <img src="https://icons.iconarchive.com/icons/icons-land/3d-food/256/Dish-Pasta-Spaghetti-icon.png"
-      style="position: absolute;height: 100px;width: 100px; top: 31%;left:42%;visibility: hidden;" id="bowl1">
-    <img src="https://icons.iconarchive.com/icons/icons-land/3d-food/256/Dish-Pasta-Spaghetti-icon.png"
-      style="position: absolute;height: 100px;width: 100px; top: 46%;left:36.6%;visibility: hidden;" id="bowl5">
-    <img src="https://icons.iconarchive.com/icons/icons-land/3d-food/256/Dish-Pasta-Spaghetti-icon.png"
-      style="position: absolute;height: 100px;width: 100px; top: 38%;left:51%;visibility: hidden;" id="bowl2">
-    <img src="https://icons.iconarchive.com/icons/icons-land/3d-food/256/Dish-Pasta-Spaghetti-icon.png"
-      style="position: absolute;height: 100px;width: 100px; top: 62%;left:41%;visibility: hidden;" id="bowl4">
-    <img src="https://icons.iconarchive.com/icons/icons-land/3d-food/256/Dish-Pasta-Spaghetti-icon.png"
-      style="position: absolute;height: 100px;width: 100px; top: 57%;left:51%;visibility: hidden;" id="bowl3">
-
-
-
-    <button type="button" , id="first" , name="one" ,
-      style="height:70px;width:70px;position:absolute;top:39%;left:38%;border-radius:50px;background-image: url('https://atlas-content-cdn.pixelsquid.com/stock-images/chopstick-chopsticks-w1Kznv7-600.jpg') ; transform: rotate(-120deg);background-repeat: no-repeat; background-size: cover;border: none;">
-    </button>
-
-    <button type="button" , id="second" , name="one" ,
-      style="height:70px;width:70px;position:absolute;top:34%;left:49%;border-radius:50px;background-image: url('https://atlas-content-cdn.pixelsquid.com/stock-images/chopstick-chopsticks-w1Kznv7-600.jpg') ; transform: rotate(-40deg);background-repeat: no-repeat; background-size: cover;border: none;background-repeat: no-repeat;">
-    </button>
-
-    <button type="button" , id="third" , name="one" ,
-      style="height:70px;width:70px;position:absolute;top:50%;left:55%;border-radius:50px;background-image: url('https://atlas-content-cdn.pixelsquid.com/stock-images/chopstick-chopsticks-w1Kznv7-600.jpg') ; transform: rotate(20deg);background-repeat: no-repeat; background-size: cover;border: none;background-repeat: no-repeat;">
-      </button>
-
-    <button type="button" , id="fifth" , name="one" ,
-      style="height:70px;width:70px;position:absolute;top:59%;left:38%;border-radius:50px;background-image: url('https://atlas-content-cdn.pixelsquid.com/stock-images/chopstick-chopsticks-w1Kznv7-600.jpg') ; transform: rotate(160deg);background-repeat: no-repeat; background-size: cover;border: none;background-repeat: no-repeat;">
-    </button>
-
-    <button type="button" , id="fourth" , name="one" ,
-      style="height:70px;width:70px;position:absolute;top:68%;left:48%;border-radius:50px;background-image: url('https://atlas-content-cdn.pixelsquid.com/stock-images/chopstick-chopsticks-w1Kznv7-600.jpg') ; transform: rotate(90deg);background-repeat: no-repeat; background-size: cover;border: none;background-repeat: no-repeat;">
-      </button>
-
-    <img src="https://icons.iconarchive.com/icons/icons-land/3d-food/256/Dish-Pasta-Spaghetti-icon.png"
-      style="position: absolute;height: 100px;width: 100px; top: 46%;left:44.5%">
-
-      <div id="dining-controls">
-        <button type="button" id="startAuto" class="control-btn btn btn-primary" onclick="toggleAuto()">Start Auto</button>
-        <button type="button" class="control-btn btn btn-primary" onclick="initiate()">Next Step</button>
+        <div class="controls">
+          <button type="button" id="startAuto" onclick="toggleAuto()">Start Auto</button>
+          <button type="button" onclick="initiate()">Next Step</button>
+        </div>
       </div>
 
+      <div class="panel-right">
+        <div class="dining-area">
+          <div class="table-center"></div>
+          
+          <div id="one" class="philosopher">1</div>
+          <div id="two" class="philosopher">2</div>
+          <div id="three" class="philosopher">3</div>
+          <div id="four" class="philosopher">4</div>
+          <div id="five" class="philosopher">5</div>
+
+          <div id="first" class="fork"></div>
+          <div id="second" class="fork"></div>
+          <div id="third" class="fork"></div>
+          <div id="fourth" class="fork"></div>
+          <div id="fifth" class="fork"></div>
+
+          <div id="bowl1" class="bowl"></div>
+          <div id="bowl2" class="bowl"></div>
+          <div id="bowl3" class="bowl"></div>
+          <div id="bowl4" class="bowl"></div>
+          <div id="bowl5" class="bowl"></div>
+        </div>
+
+        <div class="legend">
+          <div class="legend-item">
+            <div class="legend-color" style="background-color: #DCDCDC;"></div> Thinking
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background-color: #FFFF00;"></div> Hungry
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background-color: #FF0000;"></div> Eating
+          </div>
+        </div>
+      </div>
+
+    </div>
   </div>
 
-    <script type="text/javascript">
-      var phils = [0, 0, 0, 0, 0], forks = [0, 0, 0, 0, 0];
-      var autoInterval = null;
+  <script type="text/javascript">
+    var phils = [0, 0, 0, 0, 0], forks = [0, 0, 0, 0, 0];
+    var autoInterval = null;
 
-      function toggleAuto() {
-        var startBtn = document.getElementById("startAuto");
-        if (autoInterval) {
-          clearInterval(autoInterval);
-          autoInterval = null;
-          startBtn.innerHTML = "Start Auto";
-          startBtn.style.backgroundColor = "rgb(44, 165, 252)";
-        } else {
-          startBtn.innerHTML = "Stop Auto";
-          startBtn.style.backgroundColor = "#ef4444";
-          // Call initiate once immediately, then interval
-          initiate();
-          autoInterval = setInterval(initiate, 1500); // 1.5 second gap
-        }
+    function toggleAuto() {
+      var startBtn = document.getElementById("startAuto");
+      if (autoInterval) {
+        clearInterval(autoInterval);
+        autoInterval = null;
+        startBtn.innerHTML = "Start Auto";
+        startBtn.classList.remove("active");
+      } else {
+        startBtn.innerHTML = "Stop Auto";
+        startBtn.classList.add("active");
+        initiate();
+        autoInterval = setInterval(initiate, 1500);
       }
+    }
 
-      function initiate() {
-        var num = Math.random();
-        var n = Math.floor(num * 5);
+    function initiate() {
+      var num = Math.random();
+      var n = Math.floor(num * 5);
+      var change = document.getElementById("num");
 
+      if (n == 0) change.innerHTML = "Chance given to: Philosopher 1";
+      if (n == 1) change.innerHTML = "Chance given to: Philosopher 2";
+      if (n == 2) change.innerHTML = "Chance given to: Philosopher 3";
+      if (n == 3) change.innerHTML = "Chance given to: Philosopher 4";
+      if (n == 4) change.innerHTML = "Chance given to: Philosopher 5";
+
+      if (phils[n] == 0) {
+        phils[n] = 1;
         if (n == 0) {
-          var change = document.getElementById("num");
-          change.innerHTML = "Chance given to: Philospher 1"
-
+          document.getElementById("t12").innerHTML = "Yes";
+          document.getElementById("t11").innerHTML = "-";
+          document.getElementById("t13").innerHTML = "-";
         }
         if (n == 1) {
-          var change = document.getElementById("num");
-          change.innerHTML = "Chance given to: Philospher 2"
+          document.getElementById("t22").innerHTML = "Yes";
+          document.getElementById("t21").innerHTML = "-";
+          document.getElementById("t23").innerHTML = "-";
         }
         if (n == 2) {
-          var change = document.getElementById("num");
-          change.innerHTML = "Chance given to: Philospher 3"
+          document.getElementById("t32").innerHTML = "Yes";
+          document.getElementById("t31").innerHTML = "-";
+          document.getElementById("t33").innerHTML = "-";
         }
         if (n == 3) {
-          var change = document.getElementById("num");
-          change.innerHTML = "Chance given to: Philospher 4"
+          document.getElementById("t42").innerHTML = "Yes";
+          document.getElementById("t41").innerHTML = "-";
+          document.getElementById("t43").innerHTML = "-";
         }
         if (n == 4) {
-          var change = document.getElementById("num");
-          change.innerHTML = "Chance given to: Philospher 5"
+          document.getElementById("t52").innerHTML = "Yes";
+          document.getElementById("t51").innerHTML = "-";
+          document.getElementById("t53").innerHTML = "-";
         }
-
-        if (phils[n] == 0) {
-          phils[n] = 1;
-          if (n == 0) {
-            var change12 = document.getElementById("t12");
-            change12.innerHTML = "Yes"
-            var change11 = document.getElementById("t11");
-            change11.innerHTML = "-";
-            var change13 = document.getElementById("t13");
-            change13.innerHTML = "-";
-          }
-          if (n == 1) {
-            var change22 = document.getElementById("t22");
-            change22.innerHTML = "Yes";
-            var change21 = document.getElementById("t21");
-            change21.innerHTML = "-";
-            var change23 = document.getElementById("t23");
-            change23.innerHTML = "-";
-          }
-          if (n == 2) {
-            var change32 = document.getElementById("t32");
-            change32.innerHTML = "Yes";
-            var change31 = document.getElementById("t31");
-            change31.innerHTML = "-";
-            var change33 = document.getElementById("t33");
-            change33.innerHTML = "-";
-          }
-          if (n == 3) {
-            var change42 = document.getElementById("t42");
-            change42.innerHTML = "Yes";
-
-            var change41 = document.getElementById("t41");
-            change41.innerHTML = "-";
-
-            var change43 = document.getElementById("t43");
-            change43.innerHTML = "-";
-          }
-          if (n == 4) {
-            var change52 = document.getElementById("t52");
-            change52.innerHTML = "Yes";
-
-            var change51 = document.getElementById("t51");
-            change51.innerHTML = "-";
-
-            var change53 = document.getElementById("t53");
-            change53.innerHTML = "-";
-          }
-        }
-
-        else if (phils[n] == 1) {
-
-          if (forks[n] == 0 && forks[(n + 1) % 5] == 0) {
-            phils[n] = 2;
-            forks[n] = 1;
-            forks[(n + 1) % 5] = 1;
-
-            if (n == 0) {
-              document.getElementById('bowl1').style.visibility = 'visible';
-              var change12 = document.getElementById("t12");
-              change12.innerHTML = "-"
-              var change11 = document.getElementById("t11");
-              change11.innerHTML = "-";
-              var change13 = document.getElementById("t13");
-              change13.innerHTML = "Yes";
-            }
-            if (n == 1) {
-              document.getElementById('bowl2').style.visibility = 'visible';
-              var change22 = document.getElementById("t22");
-              change22.innerHTML = "-";
-              var change21 = document.getElementById("t21");
-              change21.innerHTML = "-";
-              var change23 = document.getElementById("t23");
-              change23.innerHTML = "Yes";
-            }
-            if (n == 2) {
-              document.getElementById('bowl3').style.visibility = 'visible';
-              var change32 = document.getElementById("t32");
-              change32.innerHTML = "-";
-              var change31 = document.getElementById("t31");
-              change31.innerHTML = "-";
-              var change33 = document.getElementById("t33");
-              change33.innerHTML = "Yes";
-            }
-            if (n == 3) {
-              document.getElementById("bowl4").style.visibility = "visible";
-
-              var change42 = document.getElementById("t42");
-              change42.innerHTML = "-";
-
-              var change41 = document.getElementById("t41");
-              change41.innerHTML = "-";
-
-              var change43 = document.getElementById("t43");
-              change43.innerHTML = "Yes";
-            }
-            if (n == 4) {
-              document.getElementById("bowl5").style.visibility = "visible";
-
-              var change52 = document.getElementById("t52");
-              change52.innerHTML = "-";
-
-              var change51 = document.getElementById("t51");
-              change51.innerHTML = "-";
-
-              var change53 = document.getElementById("t53");
-              change53.innerHTML = "Yes";
-            }
-
-          }
-          else {
-            k = n + 1;
-            alert("Philosopher " + k + " can't start eating now!");
-          }
-
-        }
-
-
-        else if (phils[n] == 2) {
-          phils[n] = 0;
-          forks[n] = 0;
-          forks[(n + 1) % 5] = 0;
-
-          if (n == 0) {
-
-            document.getElementById("bowl1").style.visibility = 'hidden';
-            var change12 = document.getElementById("t12");
-            change12.innerHTML = "-"
-            var change11 = document.getElementById("t11");
-            change11.innerHTML = "Yes";
-            var change13 = document.getElementById("t13");
-            change13.innerHTML = "-";
-          }
-          if (n == 1) {
-            document.getElementById("bowl2").style.visibility = 'hidden';
-            var change22 = document.getElementById("t22");
-            change22.innerHTML = "-";
-            var change21 = document.getElementById("t21");
-            change21.innerHTML = "Yes";
-            var change23 = document.getElementById("t23");
-            change23.innerHTML = "-";
-          }
-          if (n == 2) {
-            document.getElementById("bowl3").style.visibility = 'hidden'
-            var change32 = document.getElementById("t32");
-            change32.innerHTML = "-";
-            var change31 = document.getElementById("t31");
-            change31.innerHTML = "Yes";
-            var change33 = document.getElementById("t33");
-            change33.innerHTML = "-";
-          }
-          if (n == 3) {
-            document.getElementById("bowl4").style.visibility = 'hidden';
-            var change42 = document.getElementById("t42");
-            change42.innerHTML = "-";
-
-            var change41 = document.getElementById("t41");
-            change41.innerHTML = "Yes";
-
-            var change43 = document.getElementById("t43");
-            change43.innerHTML = "-";
-          }
-          if (n == 4) {
-            document.getElementById("bowl5").style.visibility = 'hidden';
-            var change52 = document.getElementById("t52");
-            change52.innerHTML = "-";
-
-            var change51 = document.getElementById("t51");
-            change51.innerHTML = "Yes";
-
-            var change53 = document.getElementById("t53");
-            change53.innerHTML = "-";
-          }
-
-        }
-
-        if (phils[0] == 0) {
-          document.getElementById("one").style.backgroundColor = '#DCDCDC';
-        }
-        if (phils[1] == 0) {
-          document.getElementById("two").style.backgroundColor = '#DCDCDC';
-        }
-        if (phils[2] == 0) {
-          document.getElementById("three").style.backgroundColor = '#DCDCDC';
-        }
-        if (phils[3] == 0) {
-          document.getElementById("four").style.backgroundColor = '#DCDCDC';
-        }
-        if (phils[4] == 0) {
-          document.getElementById("five").style.backgroundColor = '#DCDCDC';
-        }
-
-
-
-        if (phils[0] == 1) {
-          document.getElementById("one").style.backgroundColor = '#FFFF00';
-        }
-        if (phils[1] == 1) {
-          document.getElementById("two").style.backgroundColor = '#FFFF00';
-        }
-        if (phils[2] == 1) {
-          document.getElementById("three").style.backgroundColor = '#FFFF00';
-        }
-        if (phils[3] == 1) {
-          document.getElementById("four").style.backgroundColor = '#FFFF00';
-        }
-        if (phils[4] == 1) {
-          document.getElementById("five").style.backgroundColor = '#FFFF00';
-        }
-
-        if (phils[0] == 2) {
-          document.getElementById("one").style.backgroundColor = '#FF0000';
-        }
-        if (phils[1] == 2) {
-          document.getElementById("two").style.backgroundColor = '#FF0000';
-        }
-        if (phils[2] == 2) {
-          document.getElementById("three").style.backgroundColor = '#FF0000';
-        }
-        if (phils[3] == 2) {
-          document.getElementById("four").style.backgroundColor = '#FF0000';
-        }
-        if (phils[4] == 2) {
-          document.getElementById("five").style.backgroundColor = '#FF0000';
-        }
-
-        if (forks[0] == 0) {
-          document.getElementById("first").style.backgroundColor = '#DCDCDC';
-        }
-        if (forks[1] == 0) {
-          document.getElementById("second").style.backgroundColor = '#DCDCDC';
-        }
-        if (forks[2] == 0) {
-          document.getElementById("third").style.backgroundColor = '#DCDCDC';
-        }
-        if (forks[3] == 0) {
-          document.getElementById("fourth").style.backgroundColor = '#DCDCDC';
-        }
-        if (forks[4] == 0) {
-          document.getElementById("fifth").style.backgroundColor = '#DCDCDC';
-        }
-
-        if (forks[0] == 1) {
-          document.getElementById("first").style.backgroundColor = '#FF0000';
-        }
-        if (forks[1] == 1) {
-          document.getElementById("second").style.backgroundColor = '#FF0000';
-        }
-        if (forks[2] == 1) {
-          document.getElementById("third").style.backgroundColor = '#FF0000';
-        }
-        if (forks[3] == 1) {
-          document.getElementById("fourth").style.backgroundColor = '#FF0000';
-        }
-        if (forks[4] == 1) {
-          document.getElementById("fifth").style.backgroundColor = '#FF0000';
-        }
-
       }
-    </script>
-  </div>
+      else if (phils[n] == 1) {
+        if (forks[n] == 0 && forks[(n + 1) % 5] == 0) {
+          phils[n] = 2;
+          forks[n] = 1;
+          forks[(n + 1) % 5] = 1;
 
-  
+          if (n == 0) {
+            document.getElementById('bowl1').style.visibility = 'visible';
+            document.getElementById("t12").innerHTML = "-";
+            document.getElementById("t11").innerHTML = "-";
+            document.getElementById("t13").innerHTML = "Yes";
+          }
+          if (n == 1) {
+            document.getElementById('bowl2').style.visibility = 'visible';
+            document.getElementById("t22").innerHTML = "-";
+            document.getElementById("t21").innerHTML = "-";
+            document.getElementById("t23").innerHTML = "Yes";
+          }
+          if (n == 2) {
+            document.getElementById('bowl3').style.visibility = 'visible';
+            document.getElementById("t32").innerHTML = "-";
+            document.getElementById("t31").innerHTML = "-";
+            document.getElementById("t33").innerHTML = "Yes";
+          }
+          if (n == 3) {
+            document.getElementById("bowl4").style.visibility = "visible";
+            document.getElementById("t42").innerHTML = "-";
+            document.getElementById("t41").innerHTML = "-";
+            document.getElementById("t43").innerHTML = "Yes";
+          }
+          if (n == 4) {
+            document.getElementById("bowl5").style.visibility = "visible";
+            document.getElementById("t52").innerHTML = "-";
+            document.getElementById("t51").innerHTML = "-";
+            document.getElementById("t53").innerHTML = "Yes";
+          }
+        }
+        else {
+          var k = n + 1;
+          // Avoid alert in UI, just log it visually
+          change.innerHTML += " <br><span style='color:#ef4444'>(Phil " + k + " can't eat now!)</span>";
+        }
+      }
+      else if (phils[n] == 2) {
+        phils[n] = 0;
+        forks[n] = 0;
+        forks[(n + 1) % 5] = 0;
 
-  <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i
-      class="bi bi-arrow-up-short"></i></a>
+        if (n == 0) {
+          document.getElementById("bowl1").style.visibility = 'hidden';
+          document.getElementById("t12").innerHTML = "-";
+          document.getElementById("t11").innerHTML = "Yes";
+          document.getElementById("t13").innerHTML = "-";
+        }
+        if (n == 1) {
+          document.getElementById("bowl2").style.visibility = 'hidden';
+          document.getElementById("t22").innerHTML = "-";
+          document.getElementById("t21").innerHTML = "Yes";
+          document.getElementById("t23").innerHTML = "-";
+        }
+        if (n == 2) {
+          document.getElementById("bowl3").style.visibility = 'hidden';
+          document.getElementById("t32").innerHTML = "-";
+          document.getElementById("t31").innerHTML = "Yes";
+          document.getElementById("t33").innerHTML = "-";
+        }
+        if (n == 3) {
+          document.getElementById("bowl4").style.visibility = 'hidden';
+          document.getElementById("t42").innerHTML = "-";
+          document.getElementById("t41").innerHTML = "Yes";
+          document.getElementById("t43").innerHTML = "-";
+        }
+        if (n == 4) {
+          document.getElementById("bowl5").style.visibility = 'hidden';
+          document.getElementById("t52").innerHTML = "-";
+          document.getElementById("t51").innerHTML = "Yes";
+          document.getElementById("t53").innerHTML = "-";
+        }
+      }
 
-  <!-- Vendor JS Files -->
-  <!-- <script src="../../assets/vendor/purecounter/purecounter.js"></script>
-  <script src="../../assets/vendor/aos/aos.js"></script>
-  <script src="../../assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script src="../../assets/vendor/glightbox/js/glightbox.min.js"></script>
-  <script src="../../assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
-  <script src="../../assets/vendor/swiper/swiper-bundle.min.js"></script>
-  <script src="../../assets/vendor/php-email-form/validate.js"></script>
- Template Main JS File 
-  <script src="../../assets/js/main.js"></script> -->
+      // Update Colors
+      const pColors = ['#DCDCDC', '#FFFF00', '#FF0000'];
+      document.getElementById("one").style.backgroundColor = pColors[phils[0]];
+      document.getElementById("two").style.backgroundColor = pColors[phils[1]];
+      document.getElementById("three").style.backgroundColor = pColors[phils[2]];
+      document.getElementById("four").style.backgroundColor = pColors[phils[3]];
+      document.getElementById("five").style.backgroundColor = pColors[phils[4]];
+
+      const fColors = ['#DCDCDC', '#FF0000'];
+      document.getElementById("first").style.backgroundColor = fColors[forks[0]];
+      document.getElementById("second").style.backgroundColor = fColors[forks[1]];
+      document.getElementById("third").style.backgroundColor = fColors[forks[2]];
+      document.getElementById("fourth").style.backgroundColor = fColors[forks[3]];
+      document.getElementById("fifth").style.backgroundColor = fColors[forks[4]];
+    }
+  </script>
 </body>
-
 </html>

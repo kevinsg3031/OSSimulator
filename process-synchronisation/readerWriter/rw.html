@@ -8,10 +8,22 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../styles.css">
   <style>
-    .simulation-panel {
+    .sim-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       margin-top: 40px;
+    }
+
+    .simulation-panel {
+      background-color: var(--card-bg, #0f172a);
+      border: 1px solid var(--border-color, rgba(255,255,255,0.1));
+      border-radius: 12px;
       padding: 40px;
       text-align: center;
+      width: 100%;
+      max-width: 800px;
+      box-shadow: var(--shadow);
     }
     
     #reader-count {
@@ -48,6 +60,7 @@
     }
     #read-btn:hover {
       background-color: rgba(56, 189, 248, 0.2);
+      transform: translateY(-2px);
     }
 
     #write-btn {
@@ -57,6 +70,7 @@
     }
     #write-btn:hover {
       background-color: rgba(244, 114, 182, 0.2);
+      transform: translateY(-2px);
     }
 
     #reset-btn {
@@ -66,11 +80,12 @@
     }
     #reset-btn:hover {
       background-color: rgba(239, 68, 68, 0.2);
+      transform: translateY(-2px);
     }
 
     #output {
       margin-top: 30px;
-      background-color: #0f172a;
+      background-color: rgba(0,0,0,0.3);
       border: 1px solid rgba(255,255,255,0.05);
       border-radius: 12px;
       padding: 20px;
@@ -78,10 +93,13 @@
       text-align: left;
       font-size: 15px;
       font-family: monospace;
-      min-height: 150px;
+      min-height: 200px;
+      max-height: 400px;
+      overflow-y: auto;
       line-height: 1.6;
       white-space: pre-wrap;
       color: #e2e8f0;
+      box-shadow: inset 0 2px 10px rgba(0,0,0,0.2);
     }
 
     #mutex-status {
@@ -93,6 +111,7 @@
       background: rgba(255,255,255,0.03);
       border-radius: 8px;
       display: inline-block;
+      border: 1px solid rgba(255,255,255,0.05);
     }
 
     .warning {
@@ -111,22 +130,26 @@
       </nav>
     </header>
 
-    <section class="panel simulation-panel">
-      <h1 style="margin-bottom: 20px;">Reader-Writer Simulation</h1>
-      <p style="color: var(--text-muted); margin-bottom: 30px;">Coordinate multiple readers and writers accessing a shared resource while preventing race conditions.</p>
+    <div class="hero" style="padding: 30px; text-align: center; margin-bottom: 20px;">
+      <h1 style="font-size: 2.5rem; margin-bottom: 10px;">Reader-Writer Problem</h1>
+      <p style="color: var(--muted); max-width: 600px; margin: 0 auto;">Coordinate multiple readers and writers accessing a shared resource while preventing race conditions.</p>
+    </div>
 
-      <div id="reader-count">Readers: 0</div>
-      
-      <div class="btn-group">
-        <button id="read-btn" onclick="startReading()">Start Reading</button>
-        <button id="write-btn" onclick="startWriting()">Start Writing</button>
-        <button id="reset-btn" onclick="reset()">Reset Simulation</button>
-      </div>
+    <div class="sim-container">
+      <section class="simulation-panel">
+        <div id="reader-count">Readers: 0</div>
+        
+        <div class="btn-group">
+          <button id="read-btn" onclick="startReading()">Start Reading</button>
+          <button id="write-btn" onclick="startWriting()">Start Writing</button>
+          <button id="reset-btn" onclick="reset()">Reset Simulation</button>
+        </div>
 
-      <div id="mutex-status">Mutex: Unlocked</div>
+        <div id="mutex-status">Mutex: Unlocked</div>
 
-      <div id="output"></div>
-    </section>
+        <div id="output"></div>
+      </section>
+    </div>
   </div>
 
   <script>
@@ -169,8 +192,10 @@
       } else {
         const output = document.getElementById("output");
         output.innerHTML += "<span style='color: #38bdf8'>Reader is reading...</span>\n";
+        scrollToBottom(output);
         const timeout = setTimeout(function () {
           output.innerHTML += "<span style='color: #94a3b8'>Reader finished reading.</span>\n";
+          scrollToBottom(output);
           readers--;
           updateReaderCount();
           updateReadersMutex();
@@ -187,14 +212,20 @@
         writing = true;
         const output = document.getElementById("output");
         output.innerHTML += "<span style='color: #f472b6'>Writer is writing...</span>\n";
+        scrollToBottom(output);
         const timeout = setTimeout(function () {
           output.innerHTML += "<span style='color: #94a3b8'>Writer finished writing.</span>\n";
+          scrollToBottom(output);
           writing = false;
           writers--;
           updateWritersMutex();
         }, 3000);
         timeouts.push(timeout);
       }
+    }
+    
+    function scrollToBottom(element) {
+        element.scrollTop = element.scrollHeight;
     }
 
     function updateReaderCount() {
@@ -220,6 +251,7 @@
     function showWarning(message) {
       const output = document.getElementById("output");
       output.innerHTML += `<span class="warning">${message}</span>\n`;
+      scrollToBottom(output);
     }
 
     function reset() {
