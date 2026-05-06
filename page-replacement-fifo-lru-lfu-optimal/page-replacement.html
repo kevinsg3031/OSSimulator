@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://rsms.me/">
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Page Replacement Algorithms</title>
+</head>
+<body>
+    <div class="container">
+        <a href="../index.html" class="back-button"><i class="fas fa-arrow-left"></i> Back</a>
+        
+        <h1>Page Replacement Algorithms</h1>
+        
+        <div class="theory-section">
+            <h2>Understanding Page Replacement</h2>
+            <p>A Page Replacement Algorithm is a technique employed by the OS (Operating System) to manage memory by selecting which page to replace in the main memory when it becomes full. The primary goal is to minimize page faults and optimize system performance.</p>
+
+            <h3>Key Concepts</h3>
+            <ul>
+                <li><strong>Page Fault:</strong> ⚠️ The page requested is not in main memory, causing a slower access to secondary memory to fetch and load the page</li>
+                <li><strong>Frame:</strong> 📦 A fixed-size physical memory block in main memory</li>
+                <li><strong>Page:</strong> 📄 A fixed-size logical memory block in virtual memory</li>
+                <li><strong>Miss:</strong> ❌ Page requested is not in memory</li>
+                <li><strong>Hit:</strong> ✓ Page requested is already in memory</li>
+            </ul>
+
+            <h3>Available Algorithms</h3>
+            <ul>
+                <li><strong>FIFO:</strong> The page which arrived first is replaced</li>
+                <li><strong>Optimal:</strong> The page with the latest next occurrence is replaced (requires foreknowledge)</li>
+                <li><strong>LRU:</strong> The page with the earliest last usage is replaced</li>
+                <li><strong>MRU:</strong> The page with the latest last usage is replaced</li>
+                <li><strong>LFU:</strong> The page with the minimum number of uses is replaced (FIFO as tie-breaker)</li>
+                <li><strong>MFU:</strong> The page with the maximum number of uses is replaced (FIFO as tie-breaker)</li>
+                <li><strong>Random:</strong> The page to replace is selected randomly</li>
+            </ul>
+        </div>
+        
+        <div class="input-section">
+            <h2>Page Replacement Visualizer</h2>
+            
+            <div class="input-controls">
+                <div class="input-group">
+                    <label for="input_string">Enter Page Stream (space-separated):</label>
+                    <input type="text" id="input_string" placeholder="e.g., 7 0 1 2 0 3 0 4 2 3 0 3 2 4" required>
+                </div>
+                
+                <div class="input-group">
+                    <label for="frame_size">Number of Frames:</label>
+                    <input type="number" id="frame_size" min="1" max="20" value="3" required>
+                </div>
+                
+                <div class="input-group">
+                    <label for="drop_down">Choose Algorithm:</label>
+                    <select id="drop_down" required>
+                        <option value="" disabled selected>Select an algorithm</option>
+                        <option value="FIFO">First In First Out (FIFO)</option>
+                        <option value="Optimal">Optimal</option>
+                        <option value="LRU">Least Recently Used (LRU)</option>
+                        <option value="MRU">Most Recently Used (MRU)</option>
+                        <option value="LFU">Least Frequently Used (LFU)</option>
+                        <option value="MFU">Most Frequently Used (MFU)</option>
+                        <option value="Random">Random</option>
+                    </select>
+                </div>
+                
+                <button id="btn1" onclick="visualize();">Visualize</button>
+            </div>
+        </div>
+        
+        <div id="SUM" class="results-section hidden">
+            <h2>Visualization and Summary</h2>
+            
+            <div class="data">
+                <div class="table-wrapper">
+                    <table id="tbl" class="results-table">
+                        <thead></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="statistics">
+                <p id="page_miss"></p>
+                <p id="page_hits"></p>
+                <p id="miss_rate"></p>
+                <p id="hit_rate"></p>
+            </div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
